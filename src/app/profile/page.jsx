@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Card, Flex, Typography } from "antd";
-import axios from "axios";
+import "@ant-design/v5-patch-for-react-19";
 import styles from "./Profile.modules.css";
 import Image from "next/image";
 import Link from "next/link";

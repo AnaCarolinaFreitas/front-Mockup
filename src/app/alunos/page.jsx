@@ -27,13 +27,15 @@ export default function Alunos() {
     avaliacao: null,
     loading: false,
   });
+
   useEffect(() => {
     const fetchAlunos = async () => {
       const cached = getSessionStorage("alunosData", []);
-      if (cached.lenght > 0) {
+      if (cached.length > 0) {
         setData({ alunos: cached, loading: false, current: 1, pageSize: 5 });
         return;
       }
+
       try {
         const { data: alunos } = await axios.get(
           `${process.env.NEXT_PUBLIC_API_URL}/estudantes`,
@@ -42,12 +44,14 @@ export default function Alunos() {
         setSessionStorage("alunosData", alunos);
         setData({ alunos, loading: false, current: 1, pageSize: 5 });
       } catch {
-        toast.error("Erro ao buscar alunos");
+        toast.error("Erro ao carregar alunos");
         setData((d) => ({ ...d, loading: false }));
       }
     };
+
     fetchAlunos();
   }, []);
+
   const openModal = async (aluno) => {
     setModalInfo({ visible: true, aluno, avaliacao: null, loading: true });
 
@@ -62,7 +66,7 @@ export default function Alunos() {
       const { data: avaliacao } = await axios.get(
         `${process.env.NEXT_PUBLIC_API_URL}/avaliacao/${aluno.id}`,
         {
-          headers: HEADERS,
+          headers: headers,
         }
       );
       setSessionStorage(cacheKey, avaliacao);
@@ -72,6 +76,7 @@ export default function Alunos() {
       setModalInfo((m) => ({ ...m, loading: false }));
     }
   };
+
   const paginatedAlunos = () => {
     const start = (data.current - 1) * data.pageSize;
     return data.alunos.slice(start, start + data.pageSize);
@@ -79,29 +84,46 @@ export default function Alunos() {
 
   return (
     <div>
-        <h1>Lista de Alunos</h1>
+      <h1>Lista de Alunos</h1>
 
-        <Pagination
-          current={data.current}
-          pageSize={data.pageSize}
-          total={data.alunos.length}
-          onChange={(page, size) =>
-            setData((d) => ({ ...d, current: page, pageSize: size }))
-          }
-          showSizeChanger
-          pageSizeOptions={["5", "10", "100"]} />
+      <Pagination
+        current={data.current}
+        pageSize={data.pageSize}
+        total={data.alunos.length}
+        onChange={(page, size) =>
+          setData((d) => ({ ...d, current: page, pageSize: size }))
+        }
+        showSizeChanger
+        pageSizeOptions={["5", "10", "100"]}
+      />
 
-          {data.loading ? (
-            <Image src="/images/loading.gif" unoptimized priority width={500} height={200} alt="Loading" />
-          ) : (
-            <div className={styles.cardsContainer}>
-                {paginatedAlunos().map((aluno) => (
-                    <Card key={aluno.id} className={styles.card} hoverable onClick={() => openModal(aluno)} cover={
-                        <Image alt={aluno.name_estudante} src={aluno.photo ? aluno.photo : "/images/220.svg"} width={220} height={220} />
-                    }>
-                         <Card.Meta
-                title={aluno.name_estudante}
-              />
+      {data.loading ? (
+        <Image
+          src="/images/loading.gif"
+          unoptimized
+          priority
+          width={500}
+          height={200}
+          alt="Loading"
+        />
+      ) : (
+        <div className={styles.cardsContainer}>
+          {paginatedAlunos().map((aluno) => (
+            <Card
+              key={aluno.id}
+              className={styles.card}
+              hoverable
+              onClick={() => openModal(aluno)}
+              cover={
+                <Image
+                  alt={aluno.name_estudante}
+                  src={aluno.photo ? aluno.photo : "/images/220.svg"}
+                  width={220}
+                  height={220}
+                />
+              }
+            >
+              <Card.Meta title={aluno.name_estudante} />
             </Card>
           ))}
         </div>
